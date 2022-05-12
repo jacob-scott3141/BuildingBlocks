@@ -45,17 +45,18 @@ def format_data(file: str):
 
 
 if __name__ == '__main__':
-    #
-    # get_data(6, 20, 'one point', "2block5.csv", "tournament", k=2)
-    # get_data(6, 20, 'one point', "2block6.csv", "tournament", k=4)
-    # get_data(6, 20, 'one point', "2block7.csv", "tournament", k=6)
-    # get_data(6, 20, 'one point', "2block4.csv", "random")
-    #
+    # gets data: 6 incremental steps of n, 20 loops per n, csv to write to, selection type
+    # get_data(6, 20, 'one point', "data/2block4.csv", "roulette")
+    # get_data(6, 20, 'one point', "data/2block5.csv", "rank")
+    # get_data(6, 20, 'one point', "data/2block6.csv", "tournament")
+    # get_data(6, 20, 'one point', "data/2block7.csv", "random")
+
+    # uniform selection example
     # g1 = u.Genotype().init_from_genotype(np.zeros(20, dtype=int))
     # g2 = u.Genotype().init_from_genotype(np.ones(20, dtype=int))
     # u.crossover(g1, g2, 'uniform')
 
-    sizes, generations = format_data('2block1.csv')
+    sizes, generations = format_data('data/2block1.csv')
 
     data1 = {
         'x': [s*2 for s in sizes],
@@ -66,7 +67,7 @@ if __name__ == '__main__':
         'label': "2 block Roulette"
     }
 
-    sizes, generations = format_data('2block2.csv')
+    sizes, generations = format_data('data/2block2.csv')
 
     data2 = {
         'x': [s*2 for s in sizes],
@@ -77,7 +78,7 @@ if __name__ == '__main__':
         'label': "2 block Rank"
     }
 
-    sizes, generations = format_data('3block1.csv')
+    sizes, generations = format_data('data/3block1.csv')
 
     data3 = {
         'x': [s*3 for s in sizes],
@@ -88,7 +89,7 @@ if __name__ == '__main__':
         'label': "3 block Roulette"
     }
 
-    sizes, generations = format_data('3block2.csv')
+    sizes, generations = format_data('data/3block2.csv')
 
     data4 = {
         'x': [s*3 for s in sizes],
@@ -99,7 +100,7 @@ if __name__ == '__main__':
         'label': "3 block Rank"
     }
 
-    sizes, generations = format_data('4block1.csv')
+    sizes, generations = format_data('data/4block1.csv')
 
     data5 = {
         'x': [s*4 for s in sizes],
@@ -110,7 +111,7 @@ if __name__ == '__main__':
         'label': "4 block Roulette"
     }
 
-    sizes, generations = format_data('4block2.csv')
+    sizes, generations = format_data('data/4block2.csv')
 
     data6 = {
         'x': [s*4 for s in sizes],
