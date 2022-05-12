@@ -13,6 +13,14 @@ def increment():
     r = np.array(r, dtype='float64')
 
 
+def reset():
+    global n
+    global r
+    n = 10
+    r = np.random.uniform(0.5, 1, size=(n + 1, n + 1))
+    r = np.array(r, dtype='float64')
+
+
 class Genotype:
     """
     Genotype modelling R. Watson's 2 module problem
@@ -37,7 +45,7 @@ class Genotype:
         """
         size = g.shape[0]
         if size % 2 != 0:
-            print("Genotype must be of even length")
+            print("Genotype must be a multiple of 2")
             return
         size = size // 2
         self.i = g[0:size]
@@ -146,6 +154,115 @@ def fitness_proportionate_select_elitist(pop: list[Genotype], crossover_type: st
     return pop
 
 
+def tourney_select(pop: list[Genotype], crossover_type: str, k: int):
+    """
+        tourney selection. selects a population of individuals from the
+        original population by facing off random individuals from the population.
+        elitism: retains fittest individual from each generation
+        :param k: number of tourney rounds
+        :param crossover_type: type of crossover to perform
+        :param pop: list of genotypes to select from
+        :return: list of selected genotypes
+    """
+    elite = max(pop, key=lambda gene: gene.f)
+
+    temp = []
+
+    if crossover_type is not None:
+        for i in range(len(pop)):
+            parent1 = np.random.choice(pop)
+            parent2 = np.random.choice(pop)
+
+            for j in range(k-1):
+                challenger = np.random.choice(pop)
+                if challenger.f > parent1.f:
+                    parent1 = challenger
+
+            for j in range(k-1):
+                challenger = np.random.choice(pop)
+                if challenger.f > parent2.f:
+                    parent2 = challenger
+
+            temp.append(crossover(parent1, parent2, crossover_type))
+    else:
+        temp = pop
+
+    pop = [mutate(p) for p in temp]
+
+    worst = np.random.choice(pop)
+
+    pop.remove(worst)
+    pop.append(elite)
+
+    return pop
+
+
+def rank_select(pop: list[Genotype], crossover_type: str):
+    """
+        rank selection. selects a population of individuals from the
+        original population in proportion to the rank of their fitness.
+        elitism: retains fittest individual from each generation
+        :param crossover_type: type of crossover to perform
+        :param pop: list of genotypes to select from
+        :return: list of selected genotypes
+    """
+
+    elite = max(pop, key=lambda gene: gene.f)
+
+    sort = sorted(pop, key=lambda gene: gene.f)
+
+    fs = range(1, len(pop) + 1)
+    total = sum(fs)
+    probs = [i / total for i in fs]
+
+    pop1 = np.random.choice(sort, size=len(pop), p=probs).tolist()
+    temp = []
+
+    if crossover_type is not None:
+        pop2 = np.random.choice(sort, size=len(pop), p=probs).tolist()
+        for i in range(len(pop)):
+            temp.append(crossover(pop1[i], pop2[i], crossover_type))
+    else:
+        temp = pop
+
+    pop = [mutate(p) for p in temp]
+
+    worst = np.random.choice(pop)
+
+    pop.remove(worst)
+    pop.append(elite)
+
+    return pop
+
+
+def rand_select(pop: list[Genotype], crossover_type: str):
+    """
+        random parent selection.
+        elitism: retains fittest individual from each generation
+        :param crossover_type: type of crossover to perform
+        :param pop: list of genotypes to select from
+        :return: list of selected genotypes
+    """
+    elite = max(pop, key=lambda gene: gene.f)
+
+    temp = []
+    if crossover_type is not None:
+        pop1 = np.random.choice(pop, size=2).tolist()
+        for i in range(len(pop)):
+            temp.append(crossover(pop1[0], pop1[1], crossover_type))
+    else:
+        temp = pop
+
+    pop = [mutate(p) for p in temp]
+
+    worst = np.random.choice(pop)
+
+    pop.remove(worst)
+    pop.append(elite)
+
+    return pop
+
+
 def mutate(g: Genotype):
     """
     mutates a genotype g according to its rate g.m
@@ -197,9 +314,11 @@ def make_islands(num_islands, num_islanders):
 
 
 def do_sim(pop: list[list[Genotype]], crossover_type=None,
-           show_landscape=False, show_best_genotype=False):
+           show_landscape=False, show_best_genotype=False, selection="roulette", k=2):
     """
     performs a simulation on the selected group of islands
+    :param k: for k-tournament selection
+    :param selection: method of parent selection
     :param pop: islands containing islanders
     :param crossover_type: type of crossover to perform
     :param show_landscape: shows 2d representation of where the best performing genotype lies on the fitness landscape
@@ -242,7 +361,17 @@ def do_sim(pop: list[list[Genotype]], crossover_type=None,
                 print(line)
             return best, -1
 
-        pop = [fitness_proportionate_select_elitist(p, crossover_type) for p in pop]
+        if selection == "roulette":
+            pop = [fitness_proportionate_select_elitist(p, crossover_type) for p in pop]
+        elif selection == "rank":
+            pop = [rank_select(p, crossover_type) for p in pop]
+        elif selection == "tournament":
+            pop = [tourney_select(p, crossover_type, k) for p in pop]
+        elif selection == "random":
+            pop = [rand_select(p, crossover_type) for p in pop]
+        else:
+            pop = [fitness_proportionate_select_elitist(p, crossover_type) for p in pop]
+
         pop = swap_islanders(pop)
         num_iters += 1
         print()
