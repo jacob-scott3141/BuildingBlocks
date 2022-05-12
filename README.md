@@ -4,13 +4,14 @@ An implementation and extension of R.Watson's A Simple Two-Module Problem to Exe
 
 There are 2 main files: utils.py, and main.py.
 
-##utils.py
+## utils.py
 
 Utils contains all the necessary components for the re-implementation.
 
-###do_sim
+### do_sim
 
-performs a simulation on the selected group of islands
+performs a simulation on the selected group of islands.
+
     :param k: for k-tournament selection
     :param selection: method of parent selection
     :param pop: islands containing islanders
